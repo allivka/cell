@@ -5,3 +5,12 @@ version = 4
 [[package]]
 name = "cell"
 version = "0.1.0"
+dependencies = [
+ "simply_colored",
+]
+
+[[package]]
+name = "simply_colored"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcf6e9b9bc7cd39363ba9032692b5303940ab16f600fedf844de215c657ec508"

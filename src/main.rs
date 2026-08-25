@@ -1,11 +1,13 @@
-use std::env::args;
 use std::io::{stdin, stdout, Write, stderr};
 use std::process::{Command};
+use simply_colored::*;
+
 
 fn main(){
 
     loop {
-        if let Err(e) = stdout().write(b"-> ") {
+
+        if let Err(e) = stdout().write(format!("{GREEN}{}{RESET}", char::from_u32(0x2192).unwrap().to_string() + " ").as_bytes()) {
             stderr().write_fmt(format_args!("{:?}\n", e));
             continue;
         };
