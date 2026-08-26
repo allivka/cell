@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use simply_colored::RESET;
-use crate::executor::{Executor, ExecutorError, ExecutorResult, ExecutorArgs, ExecutorPWD};
+use crate::executor::*;
 use simply_colored::*;
 
 pub struct Commander<'a> {
@@ -34,7 +34,9 @@ impl<'a> Default for Commander<'a> {
         let mut this = Commander::new();
 
         this.add(&ExecutorPWD{});
+        this.add(&ExecutorExit{});
 
         this
     }
+
 }

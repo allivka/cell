@@ -40,11 +40,6 @@ fn main() -> std::io::Result<()> {
 
         let command = parts[0];
 
-        match command {
-            "exit" => break,
-            _ => ()
-        }
-
         let args = &parts[1..];
 
         let mut child = match Command::new(command).args(args).spawn() {
@@ -85,6 +80,4 @@ fn main() -> std::io::Result<()> {
             pf_error(e.to_string())?;
         };
     }
-
-    Ok(())
 }

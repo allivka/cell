@@ -1,3 +1,4 @@
+use crate::base::*;
 
 pub type ExecutorError = String;
 
@@ -11,7 +12,7 @@ pub trait Executor {
         "Unnamed executor"
     }
 
-    fn execute(&self, args: &ExecutorArgs) -> ExecutorResult<String> {
+    fn execute(&self, _args: &ExecutorArgs) -> ExecutorResult<String> {
         Ok(format!("{} is not implemented", self.name()))
     }
 }
@@ -25,7 +26,7 @@ impl Executor for ExecutorPWD {
         "pwd"
     }
 
-    fn execute(&self, args: &ExecutorArgs) -> ExecutorResult<String> {
+    fn execute(&self, _args: &ExecutorArgs) -> ExecutorResult<String> {
         match std::env::current_dir() {
             Ok(dir) => match dir.to_str() {
                 Some(dir) => Ok(dir.to_string()),
@@ -33,5 +34,17 @@ impl Executor for ExecutorPWD {
             }
             Err(e) => Err(format!("{} error; could not read current working directory: {}", self.name(), e))
         }
+    }
+}
+
+pub struct ExecutorExit {}
+impl Executor for ExecutorExit {
+    fn name(&self) -> &str {
+        "exit"
+    }
+
+    fn execute(&self, _args: &ExecutorArgs) -> ExecutorResult<String> {
+        spf_info("Exiting the shell").unwrap();
+        std::process::exit(0);
     }
 }
