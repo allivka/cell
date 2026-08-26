@@ -2,31 +2,33 @@ pub mod base;
 pub mod executor;
 pub mod commander;
 
-use std::io::{stdin, stdout, Write, stderr};
+use std::io::{stdin, stdout, Write};
 use std::process::{Command};
 use simply_colored::*;
 use crate::commander::Commander;
+use crate::base::*;
 
-fn main(){
+fn main() -> std::io::Result<()> {
 
     let commander = Commander::default();
 
     loop {
 
         if let Err(e) = stdout().write(format!("{GREEN}{}{RESET}", char::from_u32(0x2192).unwrap().to_string() + " ").as_bytes()) {
-            stderr().write_fmt(format_args!("{:?}\n", e));
+            pf_error(e.to_string())?;
+
             continue;
         };
 
         if let Err(e) = stdout().flush() {
-            stderr().write_fmt(format_args!("{:?}\n", e));
+            pf_error(e.to_string())?;
             continue;
         };
 
         let mut input = String::new();
 
         if let Err(e) = stdin().read_line(&mut input) {
-            stderr().write_fmt(format_args!("{:?}\n", e));
+            pf_error(e.to_string())?;
             continue;
         };
 
@@ -54,23 +56,23 @@ fn main(){
                         match commander.execute(String::from(command), &args.iter().map(|v| String::from(*v)).collect()) {
                             Ok(result) => {
                                 if let Err(e) = stdout().write((result + "\n").as_bytes()) {
-                                    stderr().write_fmt(format_args!("{:?}\n", e));
+                                    pf_error(e.to_string())?;
                                     continue;
                                 }
 
                                 if let Err(e) = stdout().flush() {
-                                    stderr().write_fmt(format_args!("{:?}\n", e));
+                                    pf_error(e.to_string())?;
                                     continue;
                                 }
                             },
                             Err(err) => {
-                                stderr().write_fmt(format_args!("{:?}\n", err));
+                                pf_error(err)?;
                                 continue;
                             }
                         }
                     },
                     _ => {
-                        stderr().write_fmt(format_args!("{:?}\n", e));
+                        pf_error(e.to_string())?;
                         continue;
                     }
                 }
@@ -80,8 +82,9 @@ fn main(){
         };
 
         if let Err(e) = child.wait() {
-            stderr().write_fmt(format_args!("{:?}\n", e));
+            pf_error(e.to_string())?;
         };
     }
 
+    Ok(())
 }
