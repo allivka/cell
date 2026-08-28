@@ -1,7 +1,6 @@
 use std::collections::HashMap;
-use simply_colored::RESET;
-use crate::executor::*;
 use simply_colored::*;
+use crate::executor::*;
 
 pub struct Commander<'a> {
     table: HashMap<String, &'a dyn Executor>,
