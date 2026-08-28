@@ -4,15 +4,7 @@ use crate::runner::{Runner, RunnerResult};
 use crate::runner::RunnerError::{ExecutorFailure, InvalidInput, IoFailure};
 
 pub struct DefaultRunner<'a> {
-    pub commander: Commander<'a>
-}
-
-impl DefaultRunner<'_> {
-    fn new() -> Self {
-        DefaultRunner {
-            commander: Commander::new()
-        }
-    }
+    commander: Commander<'a>
 }
 
 impl Runner for DefaultRunner<'_> {

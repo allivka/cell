@@ -1,6 +1,5 @@
-use std::string::ToString;
 use crate::executor::ExecutorError;
-use crate::runner::RunnerError::{Custom, NotImplemented};
+use crate::runner::RunnerError::{NotImplemented};
 use derive_more::Debug;
 
 #[derive(Debug, Clone)]

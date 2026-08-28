@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use simply_colored::*;
-use crate::base::pf_error;
 use crate::executor::*;
 use crate::executor::ExecutorError::NotFound;
 
