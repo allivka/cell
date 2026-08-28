@@ -1,18 +1,25 @@
 use std::fmt;
-use crate::base::format_custom;
 use crate::executor::ExecutorError::NotImplemented;
+use derive_more::Debug;
 
 #[derive(Debug, Clone)]
 pub enum ExecutorError {
+    #[debug("ExecutorError::NotImplemented -> {}", _0)]
     NotImplemented(String),
+
+    #[debug("ExecutorError::NotFound -> {}", _0)]
     NotFound(String),
+
+    #[debug("ExecutorError::IoFailure -> {}", _0)]
     IoFailure(String),
+
+    #[debug("ExecutorError::Custom -> {}", _0)]
     Custom(String),
 }
 
 impl fmt::Display for ExecutorError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", format_custom("ExecutorError", self.to_string()))
+        write!(f, "{:?}", self)
     }
 }
 

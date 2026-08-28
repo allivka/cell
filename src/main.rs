@@ -39,7 +39,7 @@ fn main() -> std::io::Result<()> {
                 continue;
             }
         };
-        
+
         if let Err(e) = stdout().write_all((output + "\n").as_bytes()) {
             pf_error(e.to_string())?;
         };

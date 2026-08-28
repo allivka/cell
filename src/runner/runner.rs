@@ -1,20 +1,32 @@
-use crate::base::{format_custom};
+use std::string::ToString;
 use crate::executor::ExecutorError;
-use crate::runner::RunnerError::NotImplemented;
+use crate::runner::RunnerError::{Custom, NotImplemented};
+use derive_more::Debug;
 
 #[derive(Debug, Clone)]
 pub enum RunnerError {
+    #[debug("RunnerError::Custom -> {}", _0)]
     Custom(String),
+    
+    #[debug("RunnerError::NotImplemented -> {}", _0)]
     NotImplemented(String),
+    
+    #[debug("RunnerError::InvalidInput -> {}", _0)]
     InvalidInput(String),
+    
+    #[debug("RunnerError::IoFailure -> {}", _0)]
     IoFailure(String),
+
+    #[debug("RunnerError::ProcessFailure -> {}", _0)]
     ProcessFailure(String),
+
+    #[debug("RunnerError::ExecutorFailure -> {}", _0)]
     ExecutorFailure(ExecutorError)
 }
 
 impl std::fmt::Display for RunnerError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", format_custom("RunnerError", self.to_string()))
+        write!(f, "{:?}", self)
     }
 }
 
