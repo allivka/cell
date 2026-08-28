@@ -1,4 +1,5 @@
 use crate::executor::*;
+use crate::executor::ExecutorError::{NotFound, IoFailure};
 
 pub struct ExecutorPWD {}
 impl Executor for ExecutorPWD {
@@ -10,9 +11,9 @@ impl Executor for ExecutorPWD {
         match std::env::current_dir() {
             Ok(dir) => match dir.to_str() {
                 Some(dir) => Ok(dir.to_string()),
-                None => Err(String::from("Error: current working directory not found"))
+                None => Err(NotFound(String::from("Error: current working directory not found")))
             }
-            Err(e) => Err(format!("{} error; could not read current working directory: {}", self.name(), e))
+            Err(e) => Err(IoFailure(format!("{} error; could not read current working directory: {}", self.name(), e)))
         }
     }
 }

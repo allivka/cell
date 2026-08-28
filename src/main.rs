@@ -4,18 +4,17 @@ pub mod commander;
 pub mod runner;
 
 use std::io::{stdin, stdout, Write};
-use std::process::{Command};
 use simply_colored::*;
-use crate::commander::Commander;
 use crate::base::*;
+use crate::runner::{DefaultRunner, Runner};
 
 fn main() -> std::io::Result<()> {
 
-    let commander = Commander::default();
+    let runner = DefaultRunner::default();
 
     loop {
 
-        if let Err(e) = stdout().write(format!("{GREEN}{}{RESET}", char::from_u32(0x2192).unwrap().to_string() + " ").as_bytes()) {
+        if let Err(e) = stdout().write_all(format!("{GREEN}{}{RESET}", char::from_u32(0x2192).unwrap().to_string() + " ").as_bytes()) {
             pf_error(e.to_string())?;
 
             continue;
@@ -33,51 +32,19 @@ fn main() -> std::io::Result<()> {
             continue;
         };
 
-        let parts = input.trim().split_whitespace().collect::<Vec<_>>();
-
-        if parts.len() < 1 {
-            continue;
-        }
-
-        let command = parts[0];
-
-        let args = &parts[1..];
-
-        let mut child = match Command::new(command).args(args).spawn() {
-            Ok(child) => child,
+        let output = match runner.run(input) {
+            Ok(output) => output,
             Err(e) => {
-
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        match commander.execute(String::from(command), &args.iter().map(|v| String::from(*v)).collect()) {
-                            Ok(result) => {
-                                if let Err(e) = stdout().write((result + "\n").as_bytes()) {
-                                    pf_error(e.to_string())?;
-                                    continue;
-                                }
-
-                                if let Err(e) = stdout().flush() {
-                                    pf_error(e.to_string())?;
-                                    continue;
-                                }
-                            },
-                            Err(err) => {
-                                pf_error(err)?;
-                                continue;
-                            }
-                        }
-                    },
-                    _ => {
-                        pf_error(e.to_string())?;
-                        continue;
-                    }
-                }
-
-                continue
-            },
+                pf_error(e.to_string())?;
+                continue;
+            }
+        };
+        
+        if let Err(e) = stdout().write_all((output + "\n").as_bytes()) {
+            pf_error(e.to_string())?;
         };
 
-        if let Err(e) = child.wait() {
+        if let Err(e) = stdout().flush() {
             pf_error(e.to_string())?;
         };
     }

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use simply_colored::*;
 use crate::executor::*;
+use crate::executor::ExecutorError::NotFound;
 
 pub struct Commander<'a> {
     table: HashMap<String, &'a dyn Executor>,
@@ -21,7 +22,7 @@ impl<'a> Commander<'a> {
     pub fn execute(&self, s: String, args: &ExecutorArgs) -> ExecutorResult<String> {
         let executor = match self.table.get(s.as_str()) {
             Some(v) => v,
-            None => return Err(format!("command {RED}[ {} ]{RESET} not found", s))
+            None => return Err(NotFound(format!("command {RED}[ {} ]{RESET} not found", s)))
         };
 
         executor.execute(args)

@@ -2,6 +2,10 @@ use std::io;
 use std::io::{stdout, Write, stderr};
 use simply_colored::*;
 
+pub fn format_custom(name: &str, v: String) -> String {
+    format!("{RED}{BOLD}{name}: {}{RESET} {v}{RED}{BOLD} {}{RESET}", "{", "}")
+}
+
 pub fn format_error(v: String) -> String {
     format!("{RED}{BOLD}Error: {}{RESET} {v}{RED}{BOLD} {}{RESET}", "{", "}")
 }
