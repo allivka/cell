@@ -1,5 +1,4 @@
 use crate::executor::ExecutorError;
-use crate::runner::RunnerError::{NotImplemented};
 use derive_more::Debug;
 
 #[derive(Debug, Clone)]
@@ -38,7 +37,7 @@ pub trait Runner {
     }
 
     fn run(&self, _input: String) -> RunnerResult<String> {
-        Err(NotImplemented(format!("{} is not implemented", self.name())))
+        Err(RunnerError::NotImplemented(format!("{} is not implemented", self.name())))
     }
 
     fn run_mut(&mut self, input: String) -> RunnerResult<String> {

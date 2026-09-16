@@ -1,10 +1,10 @@
 use std::process::Command;
-use crate::commander::Commander;
+use crate::executor_map::ExecutorMap;
 use crate::runner::{Runner, RunnerResult};
 use crate::runner::RunnerError::{ExecutorFailure, InvalidInput, IoFailure};
 
 pub struct DefaultRunner<'a> {
-    commander: Commander<'a>
+    executor_map: ExecutorMap<'a>
 }
 
 impl Runner for DefaultRunner<'_> {
@@ -29,7 +29,7 @@ impl Runner for DefaultRunner<'_> {
             Err(e) => {
                 return match e.kind() {
                     std::io::ErrorKind::NotFound => {
-                        match self.commander.execute(String::from(command), &args.iter().map(|v| String::from(*v)).collect()) {
+                        match self.executor_map.execute(String::from(command), &args.iter().map(|v| String::from(*v)).collect()) {
                             Ok(result) => {
                                 Ok(result)
                             },
@@ -62,7 +62,7 @@ impl Runner for DefaultRunner<'_> {
 impl<'a> Default for DefaultRunner<'a> {
     fn default() -> Self {
         DefaultRunner {
-            commander: Commander::default()
+            executor_map: ExecutorMap::default()
         }
     }
 }

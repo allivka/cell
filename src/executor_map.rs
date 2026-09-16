@@ -3,14 +3,14 @@ use simply_colored::*;
 use crate::executor::*;
 use crate::executor::ExecutorError::NotFound;
 
-pub struct Commander<'a> {
+pub struct ExecutorMap<'a> {
     table: HashMap<String, &'a dyn Executor>,
 }
 
-impl<'a> Commander<'a> {
+impl<'a> ExecutorMap<'a> {
 
-    pub fn new() -> Commander<'a> {
-        Commander {
+    pub fn new() -> ExecutorMap<'a> {
+        ExecutorMap {
             table: HashMap::new(),
         }
     }
@@ -31,9 +31,9 @@ impl<'a> Commander<'a> {
     }
 }
 
-impl<'a> Default for Commander<'a> {
+impl<'a> Default for ExecutorMap<'a> {
     fn default() -> Self {
-        let mut this = Commander::new();
+        let mut this = ExecutorMap::new();
 
         this.add(&ExecutorPWD{});
         this.add(&ExecutorExit{});

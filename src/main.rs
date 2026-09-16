@@ -1,7 +1,8 @@
 pub mod base;
 pub mod executor;
-pub mod commander;
+pub mod executor_map;
 pub mod runner;
+pub mod parser;
 
 use std::io::{stdin, stdout, Write};
 use simply_colored::*;
