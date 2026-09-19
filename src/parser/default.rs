@@ -5,6 +5,10 @@ pub const DEFAULT_CAPTURE_CHAR: char = '"';
 pub struct DefaultParser {}
 
 impl Parser for DefaultParser {
+    fn name(&self) -> &str {
+        "default parser"
+    }
+    
      fn parse(&self, s: String) -> ParserResult<Directive> {
          let parts = s.trim().split_whitespace().collect::<Vec<_>>();
 

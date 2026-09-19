@@ -29,9 +29,7 @@ pub type ExecutorArgs = Vec<String>;
 
 pub trait Executor {
 
-    fn name(&self) -> &str {
-        "Unnamed executor"
-    }
+    fn name(&self) -> &str;
 
     fn execute(&self, _args: &ExecutorArgs) -> ExecutorResult<String> {
         Err(NotImplemented(format!("{} is not implemented(immutable)", self.name())))
@@ -43,4 +41,8 @@ pub trait Executor {
 }
 
 pub struct UnnamedExecutor {}
-impl Executor for UnnamedExecutor {}
+impl Executor for UnnamedExecutor {
+    fn name(&self) -> &str {
+        "unnamed executor"
+    }
+}

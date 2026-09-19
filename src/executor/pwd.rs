@@ -1,8 +1,8 @@
 use crate::executor::*;
 use crate::executor::ExecutorError::{NotFound, IoFailure};
 
-pub struct ExecutorPWD {}
-impl Executor for ExecutorPWD {
+pub struct PWD {}
+impl Executor for PWD {
     fn name(&self) -> &str {
         "pwd"
     }

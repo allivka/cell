@@ -29,5 +29,12 @@ pub enum Token {
 }
 
 pub trait Parser {
+    
+    fn name(&self) -> &str;
+    
     fn parse(&self, s: String) -> ParserResult<Directive>;
+    
+    fn parse_mut(&mut self, s: String) -> ParserResult<Directive> {
+        self.parse(s)
+    }
 }

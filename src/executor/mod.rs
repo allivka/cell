@@ -7,9 +7,13 @@ pub use exit::*;
 mod pwd;
 pub use pwd::*;
 
+pub mod echo;
+pub use echo::*;
+
 pub fn get_all_executors<'a>() -> Vec<&'a dyn Executor> {
     vec![
-        &ExecutorEXIT{},
-        &ExecutorPWD{}
+        &EXIT {},
+        &PWD {},
+        &ECHO {}
     ]
 }

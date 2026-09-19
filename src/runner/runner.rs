@@ -36,9 +36,7 @@ pub type RunnerResult<T> = Result<T, RunnerError>;
 
 pub trait Runner {
 
-    fn name(&self) -> &str {
-        "unimplemented runner"
-    }
+    fn name(&self) -> &str;
 
     fn run(&self, _input: String) -> RunnerResult<String> {
         Err(RunnerError::NotImplemented(format!("{} is not implemented", self.name())))
