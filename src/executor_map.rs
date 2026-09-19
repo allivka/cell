@@ -35,8 +35,11 @@ impl<'a> Default for ExecutorMap<'a> {
     fn default() -> Self {
         let mut this = ExecutorMap::new();
 
-        this.add(&ExecutorPWD{});
-        this.add(&ExecutorExit{});
+        let executors = get_all_executors();
+        
+        for e in executors {
+            this.add(e);
+        }
 
         this
     }

@@ -2,8 +2,8 @@ use crate::base::*;
 
 use crate::executor::*;
 
-pub struct ExecutorExit {}
-impl Executor for ExecutorExit {
+pub struct ExecutorEXIT {}
+impl Executor for ExecutorEXIT {
     fn name(&self) -> &str {
         "exit"
     }
