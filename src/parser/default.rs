@@ -1,11 +1,11 @@
 use crate::parser::parser::*;
 
-pub const DEFAULT_CAPTURE_CHAR: char = '~';
+pub const DEFAULT_CAPTURE_CHAR: char = '"';
 
 pub struct DefaultParser {}
 
 impl Parser for DefaultParser {
-     fn parse(s: String) -> ParserResult<Directive> {
+     fn parse(&self, s: String) -> ParserResult<Directive> {
          let parts = s.trim().split_whitespace().collect::<Vec<_>>();
 
          if parts.len() < 1 {
@@ -68,6 +68,10 @@ impl Parser for DefaultParser {
 
          }
 
-         Ok(vec![])
+         if captured {
+             directive.push(Token::RawData(substring));
+         }
+
+         Ok(directive)
      }
 }

@@ -13,6 +13,12 @@ pub enum ParserError {
     
 }
 
+impl std::fmt::Display for ParserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 pub type ParserResult<T> = Result<T, ParserError>;
 
 pub type Directive = Vec<Token>;
@@ -23,5 +29,5 @@ pub enum Token {
 }
 
 pub trait Parser {
-    fn parse(s: String) -> ParserResult<Directive>;
+    fn parse(&self, s: String) -> ParserResult<Directive>;
 }

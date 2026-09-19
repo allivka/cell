@@ -1,6 +1,6 @@
 use std::io;
 use std::io::{stdout, Write, stderr};
-use simply_colored::*;
+pub use simply_colored::*;
 
 pub fn format_custom(name: &str, style: String,  v: String) -> String {
     format!("{style}{name}: {}{RESET} {v}{style} {}{RESET}", "{", "}")

@@ -1,5 +1,6 @@
 use crate::executor::ExecutorError;
 use derive_more::Debug;
+use crate::parser::ParserError;
 
 #[derive(Debug, Clone)]
 pub enum RunnerError {
@@ -19,7 +20,10 @@ pub enum RunnerError {
     ProcessFailure(String),
 
     #[debug("RunnerError::ExecutorFailure -> {}", _0)]
-    ExecutorFailure(ExecutorError)
+    ExecutorFailure(ExecutorError),
+
+    #[debug("RunnerError::ParserFailure -> {}", _0)]
+    ParserFailure(ParserError)
 }
 
 impl std::fmt::Display for RunnerError {
