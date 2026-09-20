@@ -53,7 +53,7 @@ impl Cell {
                 }
             };
 
-            if let Err(e) = stdout().write_all((output + "\n").as_bytes()) {
+            if let Err(e) = stdout().write_all(output.as_bytes()) {
                 pf_error(e.to_string())?;
             };
 

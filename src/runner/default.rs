@@ -6,8 +6,8 @@ use crate::runner::RunnerError::{Custom, ExecutorFailure, IoFailure, ParserFailu
 use crate::core::*;
 
 pub struct DefaultRunner {
-    executor_map: ExecutorRegistry,
-    parser: Box<dyn Parser>,
+    pub executor_map: ExecutorRegistry,
+    pub parser: Box<dyn Parser>,
 }
 
 impl Runner for DefaultRunner {
@@ -29,17 +29,19 @@ impl Runner for DefaultRunner {
 
         let command = match &directive[0] {
             Token::RawData(data) => data.clone(),
+            //TODO: implement subdirectives
             Token::SubDirective(dir) => return Err(Custom(format!("{RED}{BOLD}Subdirectives are not implemented yet!{RESET}")))
         };
 
         let args: Vec<String> = directive[1..].iter().map(|token| -> String {
             match token {
                 Token::RawData(data) => data.clone(),
+                //TODO: implement subdirectives
                 Token::SubDirective(dir) => String::new()
             }
         }).collect();
 
-        // print!("{command} {}", args.join(" "));
+        // print!("Received after parsing: {} {command} {} {}", "{", args.join(" "), "}");
 
         let child = match Command::new(&command).args(&args).spawn() {
             Ok(child) => child,
@@ -61,7 +63,6 @@ impl Runner for DefaultRunner {
                 }
             },
         };
-
         let out = match child.wait_with_output() {
             Ok(output) => output,
             Err(err) => {

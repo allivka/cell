@@ -5,7 +5,7 @@ use crate::executor::*;
 use crate::executor::ExecutorError::NotFound;
 
 pub struct ExecutorRegistry {
-    table: HashMap<String, Box<dyn Executor>>,
+    pub table: HashMap<String, Box<dyn Executor>>,
 }
 
 impl<'a> ExecutorRegistry {

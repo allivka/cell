@@ -1,5 +1,6 @@
 
 use derive_more::Debug;
+use crate::parser::closure;
 
 #[derive(Debug, Clone)]
 pub enum ParserError {
@@ -8,8 +9,9 @@ pub enum ParserError {
 
     #[debug("ParserError::InvalidInput -> {}", _0)]
     InvalidInput(String),
-    
-    
+
+    #[debug("ParserError::ClosureParserFailure -> {}", _0)]
+    ClosureParserFailure(closure::ClosureParserError),
     
 }
 
