@@ -1,19 +1,12 @@
 mod executor;
 pub use executor::*;
 
+pub mod executor_map;
+pub use executor_map::*;
+
 mod exit;
 pub use exit::*;
 
 mod pwd;
 pub use pwd::*;
 
-pub mod echo;
-pub use echo::*;
-
-pub fn get_all_executors<'a>() -> Vec<&'a dyn Executor> {
-    vec![
-        &EXIT {},
-        &PWD {},
-        &ECHO {}
-    ]
-}

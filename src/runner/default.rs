@@ -1,9 +1,9 @@
 use std::process::Command;
-use crate::executor_map::ExecutorMap;
+use crate::executor::ExecutorMap;
 use crate::parser::{DefaultParser, Parser, Token};
 use crate::runner::{Runner, RunnerResult};
 use crate::runner::RunnerError::{Custom, ExecutorFailure, IoFailure, ParserFailure};
-use crate::base::*;
+use crate::core::*;
 
 pub struct DefaultRunner<'a> {
     executor_map: ExecutorMap<'a>,

@@ -1,6 +1,14 @@
 use std::fmt;
 use crate::executor::ExecutorError::NotImplemented;
 use derive_more::Debug;
+use crate::executor::{EXIT, PWD};
+
+pub fn get_all_executors<'a>() -> Vec<&'a dyn Executor> {
+    vec![
+        &EXIT {},
+        &PWD {},
+    ]
+}
 
 #[derive(Debug, Clone)]
 pub enum ExecutorError {
