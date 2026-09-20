@@ -2,12 +2,17 @@ use std::fmt;
 use crate::executor::ExecutorError::NotImplemented;
 use derive_more::Debug;
 use crate::executor::{EXIT, PWD};
+use crate::parser::DefaultParser;
 
-pub fn get_all_executors<'a>() -> Vec<&'a dyn Executor> {
-    vec![
-        &EXIT {},
-        &PWD {},
-    ]
+pub fn get_all_executors<'a>() -> Vec<Box<dyn Executor>> {
+    let mut es: Vec<Box<dyn Executor>> = Vec::new();
+
+    es.push(Box::new(EXIT{}));
+    
+    es.push(Box::new(PWD{}));
+    
+    es
+    
 }
 
 #[derive(Debug, Clone)]
@@ -43,9 +48,9 @@ pub trait Executor {
         Err(NotImplemented(format!("{} is not implemented(immutable)", self.name())))
     }
 
-    fn execute_mut(&self, _args: &ExecutorArgs) -> ExecutorResult<String> {
-        self.execute(_args)
-    }
+    // fn execute_mut(&mut self, _args: &ExecutorArgs) -> ExecutorResult<String> {
+    //     self.execute(_args)
+    // }
 }
 
 pub struct UnnamedExecutor {}

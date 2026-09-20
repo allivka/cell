@@ -1,4 +1,6 @@
+use cell::Cell;
 
 fn main() -> std::io::Result<()> {
-    cell::run_app()
+    let app = Cell::default();
+    app.run()
 }

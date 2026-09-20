@@ -5,12 +5,12 @@ use crate::runner::{Runner, RunnerResult};
 use crate::runner::RunnerError::{Custom, ExecutorFailure, IoFailure, ParserFailure};
 use crate::core::*;
 
-pub struct DefaultRunner<'a> {
-    executor_map: ExecutorRegistry<'a>,
-    parser: &'a dyn Parser
+pub struct DefaultRunner {
+    executor_map: ExecutorRegistry,
+    parser: Box<dyn Parser>,
 }
 
-impl Runner for DefaultRunner<'_> {
+impl Runner for DefaultRunner {
 
     fn name(&self) -> &str {
         "default runner"
@@ -77,11 +77,11 @@ impl Runner for DefaultRunner<'_> {
     }
 }
 
-impl<'a> Default for DefaultRunner<'a> {
+impl Default for DefaultRunner {
     fn default() -> Self {
         DefaultRunner {
             executor_map: ExecutorRegistry::default(),
-            parser: &DefaultParser{}
+            parser: Box::new(DefaultParser::default()),
         }
     }
 }

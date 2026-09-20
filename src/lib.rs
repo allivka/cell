@@ -8,44 +8,58 @@ use simply_colored::*;
 use crate::runner::{DefaultRunner, Runner};
 use core::*;
 
-pub fn run_app() -> std::io::Result<()> {
+pub struct Cell {
+    pub runner: Box<dyn Runner>,
+}
 
-    let runner = DefaultRunner::default();
+impl Default for Cell {
+    fn default() -> Self {
+        Cell {
+            runner: Box::new(DefaultRunner::default()),
+        }
+    }
+}
 
-    loop {
+impl Cell {
+    pub fn run(&self) -> std::io::Result<()> {
 
-        if let Err(e) = stdout().write_all(format!("{GREEN}{}{RESET}", char::from_u32(0x2192).unwrap().to_string() + " ").as_bytes()) {
-            pf_error(e.to_string())?;
+        let runner = &self.runner;
 
-            continue;
-        };
+        loop {
 
-        if let Err(e) = stdout().flush() {
-            pf_error(e.to_string())?;
-            continue;
-        };
+            if let Err(e) = stdout().write_all(format!("{GREEN}{}{RESET}", char::from_u32(0x2192).unwrap().to_string() + " ").as_bytes()) {
+                pf_error(e.to_string())?;
 
-        let mut input = String::new();
+                continue;
+            };
 
-        if let Err(e) = stdin().read_line(&mut input) {
-            pf_error(e.to_string())?;
-            continue;
-        };
-
-        let output = match runner.run(input) {
-            Ok(output) => output,
-            Err(e) => {
+            if let Err(e) = stdout().flush() {
                 pf_error(e.to_string())?;
                 continue;
-            }
-        };
+            };
 
-        if let Err(e) = stdout().write_all((output + "\n").as_bytes()) {
-            pf_error(e.to_string())?;
-        };
+            let mut input = String::new();
 
-        if let Err(e) = stdout().flush() {
-            pf_error(e.to_string())?;
-        };
+            if let Err(e) = stdin().read_line(&mut input) {
+                pf_error(e.to_string())?;
+                continue;
+            };
+
+            let output = match runner.run(input) {
+                Ok(output) => output,
+                Err(e) => {
+                    pf_error(e.to_string())?;
+                    continue;
+                }
+            };
+
+            if let Err(e) = stdout().write_all((output + "\n").as_bytes()) {
+                pf_error(e.to_string())?;
+            };
+
+            if let Err(e) = stdout().flush() {
+                pf_error(e.to_string())?;
+            };
+        }
     }
 }

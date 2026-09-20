@@ -4,6 +4,12 @@ pub const DEFAULT_CAPTURE_CHAR: char = '"';
 
 pub struct DefaultParser {}
 
+impl Default for DefaultParser {
+    fn default() -> Self {
+        DefaultParser {}
+    }
+}
+
 impl Parser for DefaultParser {
     fn name(&self) -> &str {
         "default parser"

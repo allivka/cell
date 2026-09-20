@@ -1,21 +1,22 @@
 use std::collections::HashMap;
+use std::ops::Deref;
 use simply_colored::*;
 use crate::executor::*;
 use crate::executor::ExecutorError::NotFound;
 
-pub struct ExecutorRegistry<'a> {
-    table: HashMap<String, &'a dyn Executor>,
+pub struct ExecutorRegistry {
+    table: HashMap<String, Box<dyn Executor>>,
 }
 
-impl<'a> ExecutorRegistry<'a> {
+impl<'a> ExecutorRegistry {
 
-    pub fn new() -> ExecutorRegistry<'a> {
+    pub fn new() -> ExecutorRegistry {
         ExecutorRegistry {
             table: HashMap::new(),
         }
     }
 
-    pub fn register(&mut self, exec: &'a dyn Executor) {
+    pub fn register(&mut self, exec: Box<dyn Executor>) {
         self.table.insert(String::from(exec.name()), exec);
     }
 
@@ -31,7 +32,7 @@ impl<'a> ExecutorRegistry<'a> {
     }
 }
 
-impl<'a> Default for ExecutorRegistry<'a> {
+impl<'a> Default for ExecutorRegistry {
     fn default() -> Self {
         let mut this = ExecutorRegistry::new();
 
