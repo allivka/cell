@@ -3,19 +3,19 @@ use simply_colored::*;
 use crate::executor::*;
 use crate::executor::ExecutorError::NotFound;
 
-pub struct ExecutorMap<'a> {
+pub struct ExecutorRegistry<'a> {
     table: HashMap<String, &'a dyn Executor>,
 }
 
-impl<'a> ExecutorMap<'a> {
+impl<'a> ExecutorRegistry<'a> {
 
-    pub fn new() -> ExecutorMap<'a> {
-        ExecutorMap {
+    pub fn new() -> ExecutorRegistry<'a> {
+        ExecutorRegistry {
             table: HashMap::new(),
         }
     }
 
-    pub fn add(&mut self, exec: &'a dyn Executor) {
+    pub fn register(&mut self, exec: &'a dyn Executor) {
         self.table.insert(String::from(exec.name()), exec);
     }
 
@@ -31,14 +31,14 @@ impl<'a> ExecutorMap<'a> {
     }
 }
 
-impl<'a> Default for ExecutorMap<'a> {
+impl<'a> Default for ExecutorRegistry<'a> {
     fn default() -> Self {
-        let mut this = ExecutorMap::new();
+        let mut this = ExecutorRegistry::new();
 
         let executors = get_all_executors();
         
         for e in executors {
-            this.add(e);
+            this.register(e);
         }
 
         this

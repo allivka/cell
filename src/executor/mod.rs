@@ -1,8 +1,8 @@
 mod executor;
 pub use executor::*;
 
-pub mod executor_map;
-pub use executor_map::*;
+pub mod executor_registry;
+pub use executor_registry::*;
 
 mod exit;
 pub use exit::*;

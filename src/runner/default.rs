@@ -1,12 +1,12 @@
 use std::process::Command;
-use crate::executor::ExecutorMap;
+use crate::executor::ExecutorRegistry;
 use crate::parser::{DefaultParser, Parser, Token};
 use crate::runner::{Runner, RunnerResult};
 use crate::runner::RunnerError::{Custom, ExecutorFailure, IoFailure, ParserFailure};
 use crate::core::*;
 
 pub struct DefaultRunner<'a> {
-    executor_map: ExecutorMap<'a>,
+    executor_map: ExecutorRegistry<'a>,
     parser: &'a dyn Parser
 }
 
@@ -80,7 +80,7 @@ impl Runner for DefaultRunner<'_> {
 impl<'a> Default for DefaultRunner<'a> {
     fn default() -> Self {
         DefaultRunner {
-            executor_map: ExecutorMap::default(),
+            executor_map: ExecutorRegistry::default(),
             parser: &DefaultParser{}
         }
     }
