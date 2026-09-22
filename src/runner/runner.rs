@@ -38,7 +38,7 @@ pub trait Runner {
 
     fn name(&self) -> &str;
 
-    fn run(&self, _input: String) -> RunnerResult<String>;
+    fn run(&self, _input: &String) -> RunnerResult<String>;
 
     // fn run_mut(&mut self, input: String) -> RunnerResult<String> {
     //     self.run(input)

@@ -17,7 +17,7 @@ impl Parser for DefaultParser {
         "default parser"
     }
 
-    fn parse(&self, s: String) -> ParserResult<Directive> {
+    fn parse(&self, s: &String) -> ParserResult<Directive> {
 
         let closures: Vec<Closure> = vec![
             Closure::new("\"", "\"", ClosureKind::Text),

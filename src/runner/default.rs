@@ -16,9 +16,9 @@ impl Runner for DefaultRunner {
         "default runner"
     }
 
-    fn run(&self, input: String) -> RunnerResult<String> {
+    fn run(&self, input: &String) -> RunnerResult<String> {
 
-        let directive = match self.parser.parse(input) {
+        let directive = match self.parser.parse(&input) {
             Ok(directive) => directive,
             Err(e) => return Err(ParserFailure(e))
         };
