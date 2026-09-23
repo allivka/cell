@@ -60,7 +60,8 @@ impl ClosureParser for DefaultClosureParser {
     }
 }
 
-pub fn pase_closures(s: &str, closures: Vec<(String, String, ClosureKind)>) -> ClosureParserResult<ClosureParserOutput> {
+//Returns ClosureParserOutput and index vector Vec<Option<ClosureKind>> with the same lengths. kinds refer to the kinds of closure the according Element::SubElement in ClosureParserOutput has. The output vectors are always the same length or the Err will be returned
+pub fn parse_closures(s: &str, closures: Vec<(String, String, ClosureKind)>) -> ClosureParserResult<(ClosureParserOutput, Vec<Option<ClosureKind>>)> {
     if closures.iter().any(|(start, end, _)| start.is_empty() || end.is_empty()) {
         return Err(ClosureParserError::InvalidInput(String::from("closure delimiters must not be empty")));
     }
@@ -69,19 +70,26 @@ pub fn pase_closures(s: &str, closures: Vec<(String, String, ClosureKind)>) -> C
         return Err(ClosureParserError::InvalidArgument(String::from("no closures info provided to use for parsing")));
     }
 
+    let mut active_closure: usize = 0;
+
     let mut output = ClosureParserOutput::new();
+    let mut output_kinds = Vec::<Option<ClosureKind>>::new();
+
+    let mut push_output = |v: ClosureParsedElement, kind: Option<ClosureKind>| {
+        output.push(v);
+        output_kinds.push(kind);
+    };
+
     let mut word = String::new();
     let mut captured = String::new();
     let mut inside = false;
     let mut rest = s;
 
-    let mut active_closure: usize = 0;
-
     while !rest.is_empty() {
 
         if inside && rest.starts_with(closures[active_closure].1.as_str()) {
             inside = false;
-            output.push(ClosureParsedElement::SubElement(std::mem::take(&mut captured)));
+            push_output(ClosureParsedElement::SubElement(std::mem::take(&mut captured)), Some(closures[active_closure].2));
             rest = &rest[closures[active_closure].1.as_str().len()..];
             continue;
         }
@@ -101,7 +109,7 @@ pub fn pase_closures(s: &str, closures: Vec<(String, String, ClosureKind)>) -> C
             if found {
                 inside = true;
                 if !word.is_empty() {
-                    output.push(ClosureParsedElement::UsualElement(std::mem::take(&mut word)));
+                    push_output(ClosureParsedElement::UsualElement(std::mem::take(&mut word)), None);
                 }
                 rest = &rest[closures[active_closure].0.as_str().len()..];
                 continue;
@@ -115,7 +123,7 @@ pub fn pase_closures(s: &str, closures: Vec<(String, String, ClosureKind)>) -> C
             (true, _)       => captured.push(ch),
             (false, false)  => word.push(ch),
             (false, true)   => if !word.is_empty() {
-                output.push(ClosureParsedElement::UsualElement(std::mem::take(&mut word)));
+                push_output(ClosureParsedElement::UsualElement(std::mem::take(&mut word)), None);
             },
         }
     }
@@ -124,9 +132,14 @@ pub fn pase_closures(s: &str, closures: Vec<(String, String, ClosureKind)>) -> C
         return Err(ClosureParserError::UnterminatedClosure(closures[active_closure].1.as_str().to_string()));
     }
     if !word.is_empty() {
-        output.push(ClosureParsedElement::UsualElement(word));
+        push_output(ClosureParsedElement::UsualElement(word), None);
     }
-    Ok(output)
+
+    if output.len() != output_kinds.len() {
+        return Err(ClosureParserError::InternalFailure(String::from(format!("error during parsing multiple closures in one request: output token length{}{}", output.len(), output_kinds.len()))));
+    }
+
+    Ok((output, output_kinds))
 
 }
 

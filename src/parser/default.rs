@@ -1,6 +1,7 @@
+use crate::parser::closure;
 use crate::parser::closure::{Closure, ClosureKind, ClosureParsedElement};
 use crate::parser::parser::*;
-use crate::parser::ParserError::ClosureParserFailure;
+use crate::parser::ParserError::{ClosureParserFailure};
 
 pub fn get_default_closures() -> Vec<Closure> {
     vec![
@@ -29,35 +30,34 @@ impl Parser for DefaultParser {
 
         let mut directive: Directive = Vec::new();
 
-        for closure in &self.closures {
+        let (parsed, kinds) = match closure::parse_closures(s.as_str(), self.closures.iter().map(|c| -> (String, String, ClosureKind) { (c.start_seq.clone(), c.end_seq.clone(), c.kind) }).collect()) {
+            Ok((parsed, kinds)) => (parsed, kinds),
+            Err(e) => return Err(ClosureParserFailure(e)),
+        };
 
-            //TODO: add proper closure parsing one after another
-
-            let parsed = match closure.parse(s.as_str()) {
-                Ok(parsed) => parsed,
-                Err(e) => return Err(ClosureParserFailure(e)),
-            };
-
-
-            for el in parsed { match el {
-                ClosureParsedElement::UsualElement(data) => {
-                    directive.push(Token::RawData(data));
-                },
-
-                ClosureParsedElement::SubElement(data) => { match closure.kind {
-
-                    ClosureKind::Text => {
-                        directive.push(Token::RawData(data));
-                    },
-
-                    ClosureKind::Directive => {
-                        //TODO: implement directive recursive parsing
-                    }
-                }}
-            } }
-
+        if parsed.len() == 0 {
+            return Ok(directive);
         }
 
+        for i in 0..parsed.len() {
+            match &parsed[i] {
+                ClosureParsedElement::UsualElement(data) => {
+                    directive.push(Token::RawData(data.clone()));
+                },
+
+                ClosureParsedElement::SubElement(data) => {
+                    if let Some(kind) = kinds[i] { match kind{
+                        ClosureKind::Text => {
+                            directive.push(Token::RawData(data.clone()));
+                        },
+
+                        ClosureKind::Directive => {
+                            //TODO: implement directive recursive parsing
+                        }
+                    }}
+                }
+            }
+        }
 
         Ok(directive)
     }

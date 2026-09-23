@@ -2,7 +2,6 @@ use std::fmt;
 use crate::executor::ExecutorError::NotImplemented;
 use derive_more::Debug;
 use crate::executor::{EXIT, PWD};
-use crate::parser::DefaultParser;
 
 pub fn get_all_executors<'a>() -> Vec<Box<dyn Executor>> {
     let mut es: Vec<Box<dyn Executor>> = Vec::new();

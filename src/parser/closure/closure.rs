@@ -1,9 +1,9 @@
-use std::borrow::ToOwned;
 use crate::parser::closure::{ClosureParser, ClosureParserOutput, ClosureParserResult, DefaultClosureParser};
 
 pub const DEFAULT_CLOSURE_START: &str = "\"";
 pub const DEFAULT_CLOSURE_END: &str = "\"";
 
+#[derive(Copy, Clone)]
 pub enum ClosureKind {
     Text,
     Directive

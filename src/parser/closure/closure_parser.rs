@@ -1,10 +1,11 @@
-use crate::parser::{Directive, ParserResult, Token};
-
 
 #[derive(derive_more::Debug, Clone)]
 pub enum ClosureParserError {
     #[debug("ClosureParserError::Custom -> {}", _0)]
     Custom(String),
+
+    #[debug("ClosureParserError::InternalFailure -> {}", _0)]
+    InternalFailure(String),
 
     #[debug("ClosureParserError::InvalidInput -> {}", _0)]
     InvalidInput(String),
