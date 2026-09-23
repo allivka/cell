@@ -2,13 +2,21 @@ use crate::parser::closure::{Closure, ClosureKind, ClosureParsedElement};
 use crate::parser::parser::*;
 use crate::parser::ParserError::ClosureParserFailure;
 
-// pub const DEFAULT_CAPTURE_CHAR: char = '"';
+pub fn get_default_closures() -> Vec<Closure> {
+    vec![
+        Closure::new("\"", "\"", ClosureKind::Text),
+    ]
+}
 
-pub struct DefaultParser {}
+pub struct DefaultParser {
+    pub closures: Vec<Closure>,
+}
 
 impl Default for DefaultParser {
     fn default() -> Self {
-        DefaultParser {}
+        DefaultParser {
+            closures: get_default_closures(),
+        }
     }
 }
 
@@ -19,14 +27,9 @@ impl Parser for DefaultParser {
 
     fn parse(&self, s: &String) -> ParserResult<Directive> {
 
-        let closures: Vec<Closure> = vec![
-            Closure::new("\"", "\"", ClosureKind::Text),
-            //TODO: implement directive closure and other ones
-        ];
-
         let mut directive: Directive = Vec::new();
 
-        for closure in closures {
+        for closure in &self.closures {
 
             //TODO: add proper closure parsing one after another
 

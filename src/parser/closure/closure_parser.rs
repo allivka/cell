@@ -9,6 +9,9 @@ pub enum ClosureParserError {
     #[debug("ClosureParserError::InvalidInput -> {}", _0)]
     InvalidInput(String),
 
+    #[debug("ClosureParserError::InvalidArgument -> {}", _0)]
+    InvalidArgument(String),
+
     #[debug("ClosureParserError::UnterminatedClosure -> {}", _0)]
     UnterminatedClosure(String)
 
