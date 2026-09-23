@@ -13,16 +13,16 @@ use crate::runner::RunnerError::ParserFailure;
 
 pub struct Cell {
     pub runner: Box<dyn Runner>,
-    pub entrance_seq: String,
-    pub opened_closure_seq: String,
+    pub usual_prompt: String,
+    pub unterminated_closure_prompt: String,
 }
 
 impl Default for Cell {
     fn default() -> Self {
         Cell {
             runner: Box::new(DefaultRunner::default()),
-            entrance_seq: format!("{GREEN}{}{RESET}",  char::from_u32(0x2192).unwrap().to_string() + " "),
-            opened_closure_seq: format!("{BLUE}{}{RESET}",  ">>> "),
+            usual_prompt: format!("{GREEN}{}{RESET}",  char::from_u32(0x2192).unwrap().to_string() + " "),
+            unterminated_closure_prompt: format!("{BLUE}{}{RESET}",  ">>> "),
         }
     }
 }
@@ -33,21 +33,21 @@ impl Cell {
         let runner = &self.runner;
 
         let mut input_buffer = String::new();
-        let mut should_clear_input_buffer = true;
-        let mut seq: u8 = 0;
-        let print_seq = |seq: &u8| -> std::io::Result<()> {
+        let mut closed_closure = true;
 
-            if seq % 2 == 0 {
-                stdout().write_all(self.entrance_seq.as_bytes())
+        let print_prompt = |closed: bool| -> std::io::Result<()> {
+
+            if closed {
+                stdout().write_all(self.usual_prompt.as_bytes())
             } else {
-                stdout().write_all(self.opened_closure_seq.as_bytes())
+                stdout().write_all(self.unterminated_closure_prompt.as_bytes())
             }
 
         };
 
         loop {
 
-            if let Err(e) = print_seq(&seq) {
+            if let Err(e) = print_prompt(closed_closure) {
                 pf_error(e.to_string())?;
 
                 continue;
@@ -58,7 +58,7 @@ impl Cell {
                 continue;
             };
 
-            if should_clear_input_buffer {
+            if closed_closure {
                 input_buffer.clear();
             }
 
@@ -71,38 +71,21 @@ impl Cell {
             let output = match runner.run(&input_buffer) {
                 Ok(output) => output,
                 Err(e) => {
-                    let mut f = false;
-                    match &e {
-                        ParserFailure(e) => match &e {
-                            ClosureParserFailure(e) => match &e {
-                                ClosureParserError::UnterminatedClosure(e) => {
-
-                                    f = false;
-                                },
-                                _ => f = true
-                            },
-                            _ => f = true
-
+                    match e {
+                        ParserFailure(ClosureParserFailure(ClosureParserError::UnterminatedClosure(_))) => {
+                            closed_closure = false;
                         },
-                        _ => f = true
-                    }
-
-                    if f {
-                        pf_error(e.to_string())?;
-                        should_clear_input_buffer = true;
-                        seq = 0;
-
-                    } else {
-                        should_clear_input_buffer = false;
-                        seq = 1;
+                        _ => {
+                            pf_error(e.to_string())?;
+                            closed_closure = true;
+                        }
                     }
 
                     continue;
                 }
             };
 
-            should_clear_input_buffer = true;
-            seq = 0;
+            closed_closure = true;
 
             if let Err(e) = stdout().write_all(output.as_bytes()) {
                 pf_error(e.to_string())?;
