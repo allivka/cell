@@ -5,8 +5,7 @@ pub mod executor_registry;
 pub use executor_registry::*;
 
 mod exit;
-pub use exit::*;
 
 mod pwd;
-pub use pwd::*;
 
+pub mod cd;

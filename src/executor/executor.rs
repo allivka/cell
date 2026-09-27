@@ -1,14 +1,16 @@
 use std::fmt;
 use crate::executor::ExecutorError::NotImplemented;
 use derive_more::Debug;
-use crate::executor::{EXIT, PWD};
+use crate::executor::*;
 
 pub fn get_all_executors<'a>() -> Vec<Box<dyn Executor>> {
     let mut es: Vec<Box<dyn Executor>> = Vec::new();
 
-    es.push(Box::new(EXIT{}));
+    es.push(Box::new(exit::EXIT{}));
     
-    es.push(Box::new(PWD{}));
+    es.push(Box::new(pwd::PWD{}));
+
+    es.push(Box::new(cd::CD{}));
     
     es
     
