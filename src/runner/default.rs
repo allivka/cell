@@ -1,8 +1,9 @@
-use std::process::Command;
+use std::io::{Read};
+use std::process::{Command, Stdio};
 use crate::executor::ExecutorRegistry;
 use crate::parser::{DefaultParser, Parser, Token};
-use crate::runner::{Runner, RunnerResult};
-use crate::runner::RunnerError::{Custom, ExecutorFailure, IoFailure, ParserFailure};
+use crate::runner::{Runner, RunnerError, RunnerResult};
+use crate::runner::RunnerError::{ExecutorFailure, IoFailure, ParserFailure};
 use crate::core::*;
 
 pub struct DefaultRunner {
@@ -29,21 +30,23 @@ impl Runner for DefaultRunner {
 
         let command = match &directive[0] {
             Token::RawData(data) => data.clone(),
-            //TODO: implement subdirectives
-            Token::SubDirective(dir) => return Err(Custom(format!("{RED}{BOLD}Subdirectives are not implemented yet!{RESET}")))
+            Token::SubDirective(dir) => self.run(dir)?,
         };
 
         let args: Vec<String> = directive[1..].iter().map(|token| -> String {
             match token {
                 Token::RawData(data) => data.clone(),
-                //TODO: implement subdirectives
-                Token::SubDirective(dir) => String::new()
+                Token::SubDirective(dir) => match self.run(dir) {
+                        Ok(data) => data,
+                        Err(e) => panic!("{}", format_error(e.to_string())),
+                }
+
             }
         }).collect();
 
         // print!("Received after parsing: {} {command} {} {}", "{", args.join(" "), "}");
 
-        let child = match Command::new(&command).args(&args).spawn() {
+        let mut child = match Command::new(&command).stdout(Stdio::piped()).args(&args).spawn() {
             Ok(child) => child,
             Err(e) => {
                 return match e.kind() {
@@ -63,17 +66,33 @@ impl Runner for DefaultRunner {
                 }
             },
         };
-        let out = match child.wait_with_output() {
-            Ok(output) => output,
-            Err(err) => {
-                return Err(IoFailure(err.to_string()));
+
+        let mut stdout = match child.stdout.take() {
+            Some(stdout) => stdout,
+            None => {
+                return Err(RunnerError::IoFailure("child process has no stdout".to_string()));
             }
         };
 
-        match String::from_utf8(out.stdout) {
-            Ok(v) => Ok(v),
+        let mut buff = String::new();
+
+        match stdout.read_to_string(&mut buff) {
+            Ok(_) => Ok(buff.trim().to_string()),
             Err(err) => Err(IoFailure(err.to_string()))
         }
+
+
+        // let out = match child.wait_with_output() {
+        //     Ok(output) => output,
+        //     Err(err) => {
+        //         return Err(IoFailure(err.to_string()));
+        //     }
+        // };
+        //
+        // match String::from_utf8(out.stdout) {
+        //     Ok(v) => Ok(v),
+        //     Err(err) => Err(IoFailure(err.to_string()))
+        // }
 
     }
 }

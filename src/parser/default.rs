@@ -6,6 +6,7 @@ use crate::parser::ParserError::{ClosureParserFailure};
 pub fn get_default_closures() -> Vec<Closure> {
     vec![
         Closure::new("\"", "\"", ClosureKind::Text),
+        Closure::new("$(", ")", ClosureKind::Directive),
     ]
 }
 
@@ -52,7 +53,7 @@ impl Parser for DefaultParser {
                         },
 
                         ClosureKind::Directive => {
-                            //TODO: implement directive recursive parsing
+                            directive.push(Token::SubDirective(data.clone()));
                         }
                     }}
                 }

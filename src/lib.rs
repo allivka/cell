@@ -38,10 +38,13 @@ impl Cell {
         let print_prompt = |closed: bool| -> std::io::Result<()> {
 
             if closed {
-                stdout().write_all(self.usual_prompt.as_bytes())
+                stdout().write_all(self.usual_prompt.as_bytes())?;
+                stdout().flush()
             } else {
-                stdout().write_all(self.unterminated_closure_prompt.as_bytes())
+                stdout().write_all(self.unterminated_closure_prompt.as_bytes())?;
+                stdout().flush()
             }
+
 
         };
 
@@ -86,8 +89,12 @@ impl Cell {
             };
 
             closed_closure = true;
-
-            if let Err(e) = stdout().write_all(output.as_bytes()) {
+            
+            if output.is_empty() {
+                continue;
+            }
+            
+            if let Err(e) = stdout().write_all((output + "\n").as_bytes()) {
                 pf_error(e.to_string())?;
             };
 

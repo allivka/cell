@@ -27,7 +27,7 @@ pub type Directive = Vec<Token>;
 
 pub enum Token {
     RawData(String),
-    SubDirective(Directive)
+    SubDirective(String)
 }
 
 pub trait Parser {
