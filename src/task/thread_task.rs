@@ -8,9 +8,8 @@ pub struct ThreadTask<T: Send + 'static> {
     handle: Option<thread::JoinHandle<T>>,
     stdin: Box<dyn Write>,
     stdout: Box<dyn Read>,
-    stderr: Box<dyn Read> ,
-    
-    result: Option<TaskResult<T>>
+    stderr: Box<dyn Read>,
+
 }
 
 impl<T: Send + 'static> ThreadTask<T> {
@@ -36,8 +35,7 @@ impl<T: Send + 'static> ThreadTask<T> {
                     Box::new(pipes.2.1),
                 )
             })),
-            
-            result: None
+
         }
     }
 }
@@ -57,18 +55,24 @@ impl<T: Send + 'static> Task<T> for ThreadTask<T> {
 
     fn wait(&mut self) -> TaskResult<T> {
 
+        if let None = self.handle {
+            return Err(TaskError::TaskFinished(sformat_info("task already finished")));
+        }
+
         let handle = self.handle.take().expect(sformat_error("Failed waiting for thread task as it does not exist").as_str());
 
-        match handle.join() {
+        let res = match handle.join() {
             Ok(v) => Ok(v),
             Err(_) => Err(TaskError::ThreadFailure("thread failed".to_string()))
-        }
+        };
+
+        res
     }
 
     fn is_finished(&mut self) -> bool {
         match self.handle {
-            Some(ref mut handle) => handle.is_finished(),
-            None => true
+            Some(ref handle) => handle.is_finished(),
+            None => true,
         }
     }
 }

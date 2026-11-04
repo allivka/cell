@@ -15,6 +15,9 @@ pub enum TaskError {
     #[debug("TaskError::ThreadFailure -> {}", _0)]
     ThreadFailure(String),
 
+    #[debug("TaskError::TaskFinished -> {}", _0)]
+    TaskFinished(String),
+
     #[debug("TaskError::Custom -> {}", _0)]
     Custom(String),
 }

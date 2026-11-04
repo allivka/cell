@@ -19,15 +19,15 @@ impl ProcessTask {
 impl Task<ExitStatus> for ProcessTask {
 
     fn stdin(&mut self) -> Option<&mut dyn Write> {
-        Some(self.child.stdin.as_mut().unwrap() as &mut dyn Write)
+        self.child.stdin.as_mut().map(|s| s as &mut dyn Write)
     }
 
     fn stdout(&mut self) -> Option<&mut dyn Read> {
-        Some(self.child.stdout.as_mut().unwrap() as &mut dyn Read)
+        self.child.stdout.as_mut().map(|s| s as &mut dyn Read)
     }
 
     fn stderr(&mut self) -> Option<&mut dyn Read> {
-        Some(self.child.stderr.as_mut().unwrap() as &mut dyn Read)
+        self.child.stderr.as_mut().map(|s| s as &mut dyn Read)
     }
 
     fn wait(&mut self) -> TaskResult<ExitStatus> {
