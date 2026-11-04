@@ -1,5 +1,5 @@
-use std::io::{Read};
-use std::process::{Command, Stdio};
+use std::io::{Read, Stdout};
+use std::process::{Child, ChildStdout, Command, Stdio};
 use crate::executor::ExecutorRegistry;
 use crate::parser::{DefaultParser, Parser, Token};
 use crate::runner::{Runner, RunnerError, RunnerResult};
@@ -11,11 +11,39 @@ pub struct DefaultRunner {
     pub parser: Box<dyn Parser>,
 }
 
+impl DefaultRunner {
+    fn run_process(&self, command: String, args: Vec<String>) -> RunnerResult<Child> {
+        Ok(match Command::new(&command).stdout(Stdio::piped()).args(&args).spawn() {
+            Ok(child) => child,
+            Err(e) => {
+                return match e.kind() {
+                    std::io::ErrorKind::NotFound => {
+                        match self.executor_map.execute(String::from(&command), &args) {
+                            Ok(result) => {
+                                Ok(result)
+                            },
+                            Err(err) => {
+                                Err(ExecutorFailure(err))
+                            }
+                        }
+                    },
+                    r => {
+                        Err(IoFailure(r.to_string()))
+                    }
+                }
+            },
+        })
+
+    }
+}
+
 impl Runner for DefaultRunner {
 
     fn name(&self) -> &str {
         "default runner"
     }
+
+
 
     fn run(&self, input: &String) -> RunnerResult<String> {
 
@@ -44,28 +72,8 @@ impl Runner for DefaultRunner {
             }
         }).collect();
 
-        // print!("Received after parsing: {} {command} {} {}", "{", args.join(" "), "}");
 
-        let mut child = match Command::new(&command).stdout(Stdio::piped()).args(&args).spawn() {
-            Ok(child) => child,
-            Err(e) => {
-                return match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        match self.executor_map.execute(String::from(&command), &args) {
-                            Ok(result) => {
-                                Ok(result)
-                            },
-                            Err(err) => {
-                                Err(ExecutorFailure(err))
-                            }
-                        }
-                    },
-                    r => {
-                        Err(IoFailure(r.to_string()))
-                    }
-                }
-            },
-        };
+        let mut child = self.run_process(command, args)?;
 
         let mut stdout = match child.stdout.take() {
             Some(stdout) => stdout,
@@ -80,19 +88,6 @@ impl Runner for DefaultRunner {
             Ok(_) => Ok(buff.trim().to_string()),
             Err(err) => Err(IoFailure(err.to_string()))
         }
-
-
-        // let out = match child.wait_with_output() {
-        //     Ok(output) => output,
-        //     Err(err) => {
-        //         return Err(IoFailure(err.to_string()));
-        //     }
-        // };
-        //
-        // match String::from_utf8(out.stdout) {
-        //     Ok(v) => Ok(v),
-        //     Err(err) => Err(IoFailure(err.to_string()))
-        // }
 
     }
 }

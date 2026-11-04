@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 derive_more = {version =  "2.1.1", features = ["debug"]}
+os_pipe = "1.2.3"
 simply_colored = "0.1.7"

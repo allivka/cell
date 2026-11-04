@@ -3,6 +3,8 @@ pub mod executor;
 pub mod runner;
 pub mod parser;
 
+pub mod task;
+
 use std::io::{stdin, stdout, Write};
 use simply_colored::*;
 use crate::runner::{DefaultRunner, Runner};

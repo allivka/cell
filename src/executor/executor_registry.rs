@@ -26,7 +26,7 @@ impl<'a> ExecutorRegistry {
                 return Err(NotFound(format!("command {RED}[ {} ]{RESET} is not found", s)))
             }
         };
-
+        
         executor.execute(args)
     }
 }
