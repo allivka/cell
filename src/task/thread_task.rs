@@ -4,18 +4,31 @@ use std::thread;
 use crate::task::*;
 use crate::core::*;
 
+// Owned by thread, reads from stdin and writes to stderr, stdout
+pub struct ThreadPipeOwner {
+    pub stdin: Option<Box<dyn Read>>,
+    pub stdout: Option<Box<dyn Write>>,
+    pub stderr: Option<Box<dyn Write>>,
+}
+
+// Owned from outside the thread and connects to it, writes to stdin and reads stdout, stderr
+pub struct ThreadPipeConnector {
+    pub stdin: Option<Box<dyn Write>>,
+    pub stdout: Option<Box<dyn Read>>,
+    pub stderr: Option<Box<dyn Read>>,
+}
+
+
 pub struct ThreadTask<T: Send + 'static> {
     handle: Option<thread::JoinHandle<T>>,
-    stdin: Box<dyn Write>,
-    stdout: Box<dyn Read>,
-    stderr: Box<dyn Read>,
+    connector: ThreadPipeConnector
 
 }
 
 impl<T: Send + 'static> ThreadTask<T> {
-    pub fn spawn<F>(f: F) -> ThreadTask<T>
+    pub fn spawn<F>(f: F) -> TaskResult<ThreadTask<T>>
     where
-        F: FnOnce(Box<dyn Read>, Box<dyn Write>, Box<dyn Write>) -> T, //stdin reader, stdout writer adn stderr writer
+        F: FnOnce(ThreadPipeOwner) -> T, //stdin reader, stdout writer adn stderr writer
         F: Send + 'static {
 
         let  pipes = (
@@ -25,14 +38,18 @@ impl<T: Send + 'static> ThreadTask<T> {
         );
 
         Self {
-            stdin: Box::new(pipes.0.1),
-            stdout: Box::new(pipes.1.0),
-            stderr: Box::new(pipes.2.0),
+            connector: ThreadPipeConnector {
+                stdin: Some(Box::new(pipes.0.1)),
+                stdout: Some(Box::new(pipes.1.0)),
+                stderr: Some(Box::new(pipes.2.0)),
+            },
             handle: Some(thread::spawn(move || {
                 f(
-                    Box::new(pipes.0.0),
-                    Box::new(pipes.1.1),
-                    Box::new(pipes.2.1),
+                    ThreadPipeOwner {
+                        stdin: Some(Box::new(pipes.0.0)),
+                        stdout: Some(Box::new(pipes.1.1)),
+                        stderr: Some(Box::new(pipes.2.1)),
+                    }
                 )
             })),
 
@@ -42,15 +59,24 @@ impl<T: Send + 'static> ThreadTask<T> {
 
 impl<T: Send + 'static> Task<T> for ThreadTask<T> {
     fn stdin(&mut self) -> Option<&mut dyn Write> {
-        Some(self.stdin.as_mut())
+        match self.connector.stdin {
+            Some(ref mut stdin) => Some(stdin.as_mut()),
+            None => None
+        }
     }
     
     fn stdout(&mut self) -> Option<&mut dyn Read> {
-        Some(self.stdout.as_mut())
+        match self.connector.stdout {
+            Some(ref mut stdout) => Some(stdout.as_mut()),
+            None => None
+        }
     }
 
     fn stderr(&mut self) -> Option<&mut dyn Read> {
-        Some(self.stderr.as_mut())
+        match self.connector.stderr {
+            Some(ref mut stderr) => Some(stderr.as_mut()),
+            None => None
+        }
     }
 
     fn wait(&mut self) -> TaskResult<T> {
