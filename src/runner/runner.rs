@@ -1,6 +1,7 @@
 use crate::executor::ExecutorError;
 use derive_more::Debug;
 use crate::parser::ParserError;
+use crate::task::TaskError;
 
 #[derive(Debug, Clone)]
 pub enum RunnerError {
@@ -16,8 +17,8 @@ pub enum RunnerError {
     #[debug("RunnerError::IoFailure -> {}", _0)]
     IoFailure(String),
 
-    #[debug("RunnerError::ProcessFailure -> {}", _0)]
-    ProcessFailure(String),
+    #[debug("RunnerError::TaskFailure -> {}", _0)]
+    TaskFailure(TaskError),
 
     #[debug("RunnerError::ExecutorFailure -> {}", _0)]
     ExecutorFailure(ExecutorError),

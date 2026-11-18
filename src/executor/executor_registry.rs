@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 use simply_colored::*;
 use crate::executor::*;
-use crate::executor::ExecutorError::NotFound;
 use crate::task::*;
-
 pub struct ExecutorRegistry {
     pub table: HashMap<String, Box<dyn Executor>>,
 }
@@ -20,7 +18,7 @@ impl<'a> ExecutorRegistry {
         self.table.insert(String::from(exec.name()), exec);
     }
 
-    pub fn execute(&self, s: String, args: ExecutorArgs) -> TaskResult<ThreadTask<ExecutorResult<String>>> {
+    pub fn execute(&self, s: String, args: ExecutorArgs) -> TaskResult<ThreadTask<TaskResult<String>>> {
         let executor = match self.table.get(s.as_str()) {
             Some(v) => v,
             None => {
@@ -28,9 +26,12 @@ impl<'a> ExecutorRegistry {
             }
         }.dyn_clone();
 
-        Ok(ThreadTask::spawn(move |pipes| {
-            executor.execute(args, pipes)
-        }))
+        ThreadTask::spawn(move |pipes| {
+            match executor.execute(args, pipes) {
+                Ok(v) => Ok(v),
+                Err(e) => Err(TaskError::ExecutorFailure(e))
+            }
+        })
 
     }
 }

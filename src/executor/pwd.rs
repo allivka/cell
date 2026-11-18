@@ -1,6 +1,7 @@
+use std::io::Write;
 use crate::executor::*;
 use crate::executor::ExecutorError::{NotFound, IoFailure};
-use crate::task::ThreadPipeOwner;
+use crate::task::TaskPipeOwner;
 
 pub struct PWD {}
 impl Executor for PWD {
@@ -8,14 +9,26 @@ impl Executor for PWD {
         "pwd"
     }
 
-    fn execute(&self, _args: ExecutorArgs, _pipes: ThreadPipeOwner) -> ExecutorResult<String> {
-        match std::env::current_dir() {
+    fn execute(&self, _args: ExecutorArgs, mut pipes: TaskPipeOwner) -> ExecutorResult<String> {
+        let stdout = match pipes.stdout_writer {
+            Some(ref mut writer) => writer,
+            None => return Err(IoFailure(String::from("no stdout pipe provided")))
+        };
+
+        let s = match std::env::current_dir() {
             Ok(dir) => match dir.to_str() {
-                Some(dir) => Ok(dir.to_string()),
-                None => Err(NotFound(String::from("Error: current working directory not found")))
+                Some(dir) => dir.to_string(),
+                None => return Err(NotFound(String::from("Error: current working directory not found")))
             }
-            Err(e) => Err(IoFailure(format!("{} error; could not read current working directory: {}", self.name(), e)))
+            Err(e) => return Err(IoFailure(format!("{} error; could not read current working directory: {}", self.name(), e)))
+        };
+
+        match stdout.write_fmt(format_args!("{}", s)) {
+            Ok(_) => (),
+            Err(e) => return Err(IoFailure(format!("{} error; could not write to stdout: {}", self.name(), e)))
         }
+
+        Ok(String::new())
     }
 
     fn dyn_clone(&self) -> Box<dyn Executor> {

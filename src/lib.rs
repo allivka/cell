@@ -6,7 +6,6 @@ pub mod parser;
 pub mod task;
 
 use std::io::{stdin, stdout, Write};
-use simply_colored::*;
 use crate::runner::{DefaultRunner, Runner};
 use core::*;
 use crate::parser::closure::ClosureParserError;

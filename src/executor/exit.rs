@@ -1,7 +1,7 @@
 use crate::core::*;
 
 use crate::executor::*;
-use crate::task::ThreadPipeOwner;
+use crate::task::TaskPipeOwner;
 
 pub struct EXIT {}
 impl Executor for EXIT {
@@ -9,7 +9,7 @@ impl Executor for EXIT {
         "exit"
     }
 
-    fn execute(&self, _args: ExecutorArgs, _pipes: ThreadPipeOwner) -> ExecutorResult<String> {
+    fn execute(&self, _args: ExecutorArgs, _pipes: TaskPipeOwner) -> ExecutorResult<String> {
         spf_info("Exiting the shell").unwrap();
         std::process::exit(0);
     }

@@ -1,10 +1,9 @@
-use std::io::{Read, Stdout};
-use std::process::{Child, ChildStdout, Command, Stdio};
+use std::process::{Command};
 use crate::executor::ExecutorRegistry;
 use crate::parser::{DefaultParser, Parser, Token};
-use crate::runner::{Runner, RunnerError, RunnerResult};
-use crate::runner::RunnerError::{ExecutorFailure, IoFailure, ParserFailure};
-use crate::core::*;
+use crate::runner::{Runner, RunnerResult};
+use crate::runner::RunnerError::{IoFailure, ParserFailure, TaskFailure};
+use crate::task::{ProcessTask, Task, TaskResult, TaskError};
 
 pub struct DefaultRunner {
     pub executor_map: ExecutorRegistry,
@@ -12,27 +11,22 @@ pub struct DefaultRunner {
 }
 
 impl DefaultRunner {
-    fn run_process(&self, command: String, args: Vec<String>) -> RunnerResult<Child> {
-        Ok(match Command::new(&command).stdout(Stdio::piped()).args(&args).spawn() {
-            Ok(child) => child,
-            Err(e) => {
-                return match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        match self.executor_map.execute(String::from(&command), &args) {
-                            Ok(result) => {
-                                Ok(result)
-                            },
-                            Err(err) => {
-                                Err(ExecutorFailure(err))
-                            }
-                        }
+    fn run_process(&self, command: String, args: Vec<String>) -> RunnerResult<Box<dyn Task<TaskResult<String>>>> {
+        match ProcessTask::spawn(Command::new(&command).args(&args)) {
+            Ok(child) => Ok(Box::new(child)),
+            Err(TaskError::NotFound(_)) => {
+                match self.executor_map.execute(String::from(&command), args) {
+                    Ok(result) => {
+                        Ok(Box::new(result))
                     },
-                    r => {
-                        Err(IoFailure(r.to_string()))
+                    Err(e) => {
+                        Err(TaskFailure(e))
                     }
                 }
             },
-        })
+            Err(e) => Err(TaskFailure(e)),
+        }
+
 
     }
 }
@@ -61,33 +55,54 @@ impl Runner for DefaultRunner {
             Token::SubDirective(dir) => self.run(dir)?,
         };
 
-        let args: Vec<String> = directive[1..].iter().map(|token| -> String {
-            match token {
+        let mut args: Vec<String> = Vec::with_capacity(directive.len() - 1);
+
+        for token in directive[1..].iter() {
+            args.push(match token {
                 Token::RawData(data) => data.clone(),
                 Token::SubDirective(dir) => match self.run(dir) {
-                        Ok(data) => data,
-                        Err(e) => panic!("{}", format_error(e.to_string())),
+                    Ok(data) => data,
+                    // Err(e) => panic!("{}", format_error(e.to_string())),
+                    Err(e) => return Err(e)
                 }
 
-            }
-        }).collect();
-
+            })
+        }
 
         let mut child = self.run_process(command, args)?;
 
-        let mut stdout = match child.stdout.take() {
-            Some(stdout) => stdout,
-            None => {
-                return Err(RunnerError::IoFailure("child process has no stdout".to_string()));
-            }
-        };
+        // let res = format_info(match child.wait() {
+        //     Ok(Ok(res)) => res,
+        //     Err(e) | Ok(Err(e)) => return Err(TaskFailure(e)),
+        // });
 
         let mut buff = String::new();
 
+        let stdout = match child.stdout().take() {
+            Some(stdout) => stdout,
+            None => {
+                return Err(IoFailure("child process has no stdout".to_string()));
+            }
+        };
+
         match stdout.read_to_string(&mut buff) {
-            Ok(_) => Ok(buff.trim().to_string()),
-            Err(err) => Err(IoFailure(err.to_string()))
-        }
+            Ok(_) => (),
+            Err(err) => return Err(IoFailure(err.to_string()))
+        };
+
+        let stderr = match child.stderr().take() {
+            Some(stderr) => stderr,
+            None => {
+                return Err(IoFailure("child process has no stdout".to_string()));
+            }
+        };
+
+        match stderr.read_to_string(&mut buff) {
+            Ok(_) => (),
+            Err(err) => return Err(IoFailure(err.to_string()))
+        };
+
+        Ok(buff.to_string()/* + "\n" + res.as_str()*/)
 
     }
 }

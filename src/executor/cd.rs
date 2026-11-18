@@ -2,7 +2,7 @@ use std::env;
 use std::path::Path;
 use crate::executor::{Executor, ExecutorArgs, ExecutorResult};
 use crate::executor::ExecutorError::IoFailure;
-use crate::task::ThreadPipeOwner;
+use crate::task::TaskPipeOwner;
 
 pub struct CD {}
 
@@ -11,7 +11,7 @@ impl Executor for CD {
         "cd"
     }
 
-    fn execute(&self, args: ExecutorArgs, _pipes: ThreadPipeOwner) -> ExecutorResult<String> {
+    fn execute(&self, args: ExecutorArgs, _pipes: TaskPipeOwner) -> ExecutorResult<String> {
 
         if !args.is_empty() {
             if let Err(e) = env::set_current_dir(Path::new(args[0].as_str())) {

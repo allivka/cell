@@ -2,7 +2,7 @@ use std::fmt;
 use crate::executor::ExecutorError::NotImplemented;
 use derive_more::Debug;
 use crate::executor::*;
-use crate::task::{TaskError, ThreadPipeOwner};
+use crate::task::{TaskPipeOwner};
 
 pub fn get_all_executors<'a>() -> Vec<Box<dyn Executor>> {
     let mut es: Vec<Box<dyn Executor>> = Vec::new();
@@ -28,8 +28,8 @@ pub enum ExecutorError {
     #[debug("ExecutorError::IoFailure -> {}", _0)]
     IoFailure(String),
 
-    #[debug("ExecutorError::TaskFailure -> {}", _0)]
-    TaskFailure(TaskError),
+    // #[debug("ExecutorError::TaskFailure -> {}", _0)]
+    // TaskFailure(TaskError),
 
     #[debug("ExecutorError::Custom -> {}", _0)]
     Custom(String),
@@ -49,7 +49,7 @@ pub trait Executor : Send {
 
     fn name(&self) -> &str;
 
-    fn execute(&self, _args: ExecutorArgs, _pipes: ThreadPipeOwner) -> ExecutorResult<String> {
+    fn execute(&self, _args: ExecutorArgs, _pipes: TaskPipeOwner) -> ExecutorResult<String> {
         Err(NotImplemented(format!("{} is not implemented(immutable)", self.name())))
     }
     
